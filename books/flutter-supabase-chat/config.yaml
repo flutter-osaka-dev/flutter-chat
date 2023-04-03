@@ -1,0 +1,22 @@
+title: "Flutter × Supabase でチャットを作ろう"
+summary: 
+  Flutter Tutorial から一歩踏み出してみたい人 / 他開発経験があり、ネイティヴアプリを触ってみたい人へ
+
+  Supabase と連携して、ユーザー連携や Flutter へのチャット連携などを解説していきます。
+
+topics: ["zenn", "flutter", "supabase"] # 5 つまで
+published: true # 下書きは false
+price: 0
+chapters:
+  - page1
+    # Supabase のプロジェクト作成
+  - page2
+    # Flutter create & Flutter と Supabase の紐付け
+  - page3
+    # ログインページ
+  - page4
+    # チャットのロジック
+  - page5
+    # UI 作成
+  - page6
+    # 謝辞
