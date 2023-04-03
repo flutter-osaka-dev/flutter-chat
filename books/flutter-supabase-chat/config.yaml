@@ -9,14 +9,16 @@ published: true # 下書きは false
 price: 0
 chapters:
   - page1
-    # Supabase のプロジェクト作成
+    # はじめに
   - page2
-    # Flutter create & Flutter と Supabase の紐付け
+    # Supabase のプロジェクト作成
   - page3
-    # ログインページ
+    # Flutter create & Flutter と Supabase の紐付け
   - page4
-    # チャットのロジック
+    # ログインページ
   - page5
-    # UI 作成
+    # チャットのロジック
   - page6
+    # UI 作成
+  - page7
     # 謝辞
