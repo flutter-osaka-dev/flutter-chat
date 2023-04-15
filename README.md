@@ -1,23 +1,20 @@
-# Flutter Chat Example
+# Flutter Chat サンプル
 
-Simple chat app to demonstrate the realtime capability of Supabase with Flutter. You can follow along on how to build this app on [this article](https://supabase.com/blog/flutter-tutorial-building-a-chat-app).
+このアプリはFlutterとSupabaseを使って作られたシンプルなチャットアプリです。詳細な作り方のステップは[こちら](https://zenn.dev/dshukertjr/books/flutter-supabase-chat)にまとめてあります。
 
-You can also find an example using [row level security](https://supabase.com/docs/guides/auth/row-level-security) to provide chat rooms to enable 1 to 1 chats on the [`with-auth` branch](https://github.com/supabase-community/flutter-chat/tree/with_auth). 
-
-## SQL
+## 環境構築用のSQL
 
 ```sql
--- *** Table definitions ***
-
+-- テーブル定義
 create table if not exists public.profiles (
     id uuid references auth.users on delete cascade not null primary key,
     username varchar(24) not null unique,
     created_at timestamp with time zone default timezone('utc' :: text, now()) not null,
 
-    -- username should be 3 to 24 characters long containing alphabets, numbers and underscores
+    -- ユーザー名にRegexを使って制限をかける
     constraint username_validation check (username ~* '^[A-Za-z0-9_]{3,24}$')
 );
-comment on table public.profiles is 'Holds all of users profile information';
+comment on table public.profiles is 'ユーザー名などのユーザー情報を保持する';
 
 create table if not exists public.messages (
     id uuid not null primary key default uuid_generate_v4(),
@@ -25,14 +22,13 @@ create table if not exists public.messages (
     content varchar(500) not null,
     created_at timestamp with time zone default timezone('utc' :: text, now()) not null
 );
-comment on table public.messages is 'Holds individual messages within a chat room.';
+comment on table public.messages is 'アプリ内で送られたチャットを保持する';
 
--- *** Add tables to the publication to enable realtime ***
+-- *** Realtimeを有効化する。UIからも編集可能 ***
 alter publication supabase_realtime add table public.messages;
 
 
--- Function to create a new row in profiles table upon signup
--- Also copies the username value from metadata
+--　auth.usersからユーザー名を抜き取ってprofilesテーブルに挿入するfunction
 create or replace function handle_new_user() returns trigger as $$
     begin
         insert into public.profiles(id, username)
@@ -42,7 +38,7 @@ create or replace function handle_new_user() returns trigger as $$
     end;
 $$ language plpgsql security definer;
 
--- Trigger to call `handle_new_user` when new user signs up
+-- 上記functionを呼ぶトリガー。auth.usersにinsertされたらhandle_new_user()を呼ぶ
 create trigger on_auth_user_created
     after insert on auth.users
     for each row
