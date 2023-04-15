@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 
 import 'package:my_chat_app/models/message.dart';
 import 'package:my_chat_app/models/profile.dart';
+import 'package:my_chat_app/pages/register_page.dart';
 import 'package:my_chat_app/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart';
 
-/// Page to chat with someone.
+/// 他のユーザーとチャットができるページ
 ///
-/// Displays chat bubbles as a ListView and TextField to enter new chat.
+/// `ListView`内にチャットが表示され、下の`TextField`から他のユーザーへチャットを送信できる。
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
 
@@ -25,8 +26,14 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  /// メッセージをロードするためのストリーム
   late final Stream<List<Message>> _messagesStream;
+
+  /// プロフィール情報をメモリー内にキャッシュしておくための変数
   final Map<String, Profile> _profileCache = {};
+
+  /// メッセージのサブスクリプション
+  late final StreamSubscription<List<Message>> _messagesSubscription;
 
   @override
   void initState() {
@@ -38,9 +45,22 @@ class _ChatPageState extends State<ChatPage> {
         .map((maps) => maps
             .map((map) => Message.fromMap(map: map, myUserId: myUserId))
             .toList());
+    _messagesSubscription = _messagesStream.listen((messages) {
+      for (final message in messages) {
+        _loadProfileCache(message.profileId);
+      }
+    });
     super.initState();
   }
 
+  @override
+  void dispose() {
+    // きちんとcancelしてメモリーリークを防ぐ
+    _messagesSubscription.cancel();
+    super.dispose();
+  }
+
+  /// 特定のユーザーのプロフィール情報をロードしてキャッシュする
   Future<void> _loadProfileCache(String profileId) async {
     if (_profileCache[profileId] != null) {
       return;
@@ -56,7 +76,22 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat')),
+      appBar: AppBar(
+        title: const Text('チャット'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              supabase.auth.signOut();
+              Navigator.of(context)
+                  .pushAndRemoveUntil(RegisterPage.route(), (route) => false);
+            },
+            child: Text(
+              'ログアウト',
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+            ),
+          )
+        ],
+      ),
       body: StreamBuilder<List<Message>>(
         stream: _messagesStream,
         builder: (context, snapshot) {
@@ -67,22 +102,17 @@ class _ChatPageState extends State<ChatPage> {
                 Expanded(
                   child: messages.isEmpty
                       ? const Center(
-                          child: Text('Start your conversation now :)'),
+                          child: Text('早速メッセージを送ってみよう！'),
                         )
                       : ListView.builder(
                           reverse: true,
                           itemCount: messages.length,
                           itemBuilder: (context, index) {
                             final message = messages[index];
-
-                            /// I know it's not good to include code that is not related
-                            /// to rendering the widget inside build method, but for
-                            /// creating an app quick and dirty, it's fine 😂
-                            _loadProfileCache(message.profileId);
-
                             return _ChatBubble(
                               message: message,
-                              profile: _profileCache[message.profileId],
+                              profile: _profileCache[
+                                  message.profileId], // キャッシュしたプロフィール情報を渡す
                             );
                           },
                         ),
@@ -99,7 +129,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
-/// Set of widget that contains TextField and Button to submit message
+/// チャット入力用のテキストフィールドと送信ボタンを持つウィジェット
 class _MessageBar extends StatefulWidget {
   const _MessageBar({
     Key? key,
@@ -110,7 +140,7 @@ class _MessageBar extends StatefulWidget {
 }
 
 class _MessageBarState extends State<_MessageBar> {
-  late final TextEditingController _textController;
+  late final TextEditingController _textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -124,11 +154,11 @@ class _MessageBarState extends State<_MessageBar> {
               Expanded(
                 child: TextFormField(
                   keyboardType: TextInputType.text,
-                  maxLines: null,
-                  autofocus: true,
+                  maxLines: null, // 複数行入力可能にする
+                  autofocus: true, // ページを開いた際に自動的にフォーカスする
                   controller: _textController,
                   decoration: const InputDecoration(
-                    hintText: 'Type a message',
+                    hintText: 'メッセージを入力',
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     contentPadding: EdgeInsets.all(8),
@@ -137,7 +167,7 @@ class _MessageBarState extends State<_MessageBar> {
               ),
               TextButton(
                 onPressed: () => _submitMessage(),
-                child: const Text('Send'),
+                child: const Text('送信'),
               ),
             ],
           ),
@@ -147,21 +177,17 @@ class _MessageBarState extends State<_MessageBar> {
   }
 
   @override
-  void initState() {
-    _textController = TextEditingController();
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _textController.dispose();
     super.dispose();
   }
 
+  /// メッセージを送信する
   void _submitMessage() async {
     final text = _textController.text;
     final myUserId = supabase.auth.currentUser!.id;
     if (text.isEmpty) {
+      // 入力された文字がなければ何もしない
       return;
     }
     _textController.clear();
@@ -171,13 +197,16 @@ class _MessageBarState extends State<_MessageBar> {
         'content': text,
       });
     } on PostgrestException catch (error) {
+      // エラーが発生した場合はエラーメッセージを表示
       context.showErrorSnackBar(message: error.message);
     } catch (_) {
+      // 予期せぬエラーが起きた際は予期せぬエラー用のメッセージを表示
       context.showErrorSnackBar(message: unexpectedErrorMessage);
     }
   }
 }
 
+/// チャットのメッセージを表示するためのウィジェット
 class _ChatBubble extends StatelessWidget {
   const _ChatBubble({
     Key? key,

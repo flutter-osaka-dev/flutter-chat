@@ -1,3 +1,4 @@
+/// ユーザーのプロフィール情報を保持するクラス
 class Profile {
   Profile({
     required this.id,
@@ -5,13 +6,13 @@ class Profile {
     required this.createdAt,
   });
 
-  /// User ID of the profile
+  /// ユーザーのID
   final String id;
 
-  /// Username of the profile
+  /// ユーザー名
   final String username;
 
-  /// Date and time when the profile was created
+  /// ユーザーの作成日時
   final DateTime createdAt;
 
   Profile.fromMap(Map<String, dynamic> map)

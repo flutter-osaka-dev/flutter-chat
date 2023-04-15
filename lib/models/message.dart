@@ -7,21 +7,22 @@ class Message {
     required this.isMine,
   });
 
-  /// ID of the message
+  /// メッセージのID
   final String id;
 
-  /// ID of the user who posted the message
+  /// メッセージを送信した人のユーザーID
   final String profileId;
 
-  /// Text content of the message
+  /// メッセージの内容
   final String content;
 
-  /// Date and time when the message was created
+  /// メッセージの送信日時
   final DateTime createdAt;
 
-  /// Whether the message is sent by the user or not.
+  /// このメッセージを送ったのが自分かどうか
   final bool isMine;
 
+  /// [map]にSupabaseからのデータを渡し、[myUserId]には自分のauthのユーザーIDを渡すと[Message]のインスタンスを作成できる。
   Message.fromMap({
     required Map<String, dynamic> map,
     required String myUserId,

@@ -1,9 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:my_chat_app/pages/chat_page.dart';
 import 'package:my_chat_app/pages/register_page.dart';
 import 'package:my_chat_app/utils/constants.dart';
 
-/// Page to redirect users to the appropriate page depending on the initial auth state
+/// ログイン状態に応じてユーザーをリダイレクトするページ
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
 
@@ -19,9 +21,10 @@ class SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _redirect() async {
-    // await for for the widget to mount
+    // widgetがmountするのを待つ
     await Future.delayed(Duration.zero);
 
+    /// ログイン状態に応じて適切なページにリダイレクト
     final session = supabase.auth.currentSession;
     if (session == null) {
       Navigator.of(context)

@@ -11,10 +11,10 @@ class LoginPage extends StatefulWidget {
   }
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -28,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+      // ログイン後にチャットページに飛ぶ
       Navigator.of(context)
           .pushAndRemoveUntil(ChatPage.route(), (route) => false);
     } on AuthException catch (error) {
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (mounted) {
       setState(() {
-        _isLoading = true;
+        _isLoading = false;
       });
     }
   }
@@ -52,25 +53,25 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign In')),
+      appBar: AppBar(title: const Text('ログイン')),
       body: ListView(
         padding: formPadding,
         children: [
           TextFormField(
             controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'メールアドレス'),
             keyboardType: TextInputType.emailAddress,
           ),
           formSpacer,
           TextFormField(
             controller: _passwordController,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'パスワード'),
             obscureText: true,
           ),
           formSpacer,
           ElevatedButton(
             onPressed: _isLoading ? null : _signIn,
-            child: const Text('Login'),
+            child: const Text('ログイン'),
           ),
         ],
       ),

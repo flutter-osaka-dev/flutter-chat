@@ -1,71 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Supabase client
+/// Supabase にアクセスするためのクライアントインスタンス
 final supabase = Supabase.instance.client;
 
-/// Simple preloader inside a Center widget
+/// シンプルなプリローダー
 const preloader =
     Center(child: CircularProgressIndicator(color: Colors.orange));
 
-/// Simple sized box to space out form elements
+/// ちょっとした隙間を作るのに便利なウィジェット
 const formSpacer = SizedBox(width: 16, height: 16);
 
-/// Some padding for all the forms to use
+/// フォームのパディング
 const formPadding = EdgeInsets.symmetric(vertical: 20, horizontal: 16);
 
-/// Error message to display the user when unexpected error occurs.
-const unexpectedErrorMessage = 'Unexpected error occured.';
+/// 予期せぬエラーが起きた際のエラーメッセージ
+const unexpectedErrorMessage = '予期せぬエラーが起きました';
 
-/// Basic theme to change the look and feel of the app
-final appTheme = ThemeData.light().copyWith(
-  primaryColorDark: Colors.orange,
-  appBarTheme: const AppBarTheme(
-    elevation: 1,
-    backgroundColor: Colors.white,
-    iconTheme: IconThemeData(color: Colors.black),
-    titleTextStyle: TextStyle(
-      color: Colors.black,
-      fontSize: 18,
-    ),
-  ),
-  primaryColor: Colors.orange,
-  textButtonTheme: TextButtonThemeData(
-    style: TextButton.styleFrom(
-      foregroundColor: Colors.orange,
-    ),
-  ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ElevatedButton.styleFrom(
-      foregroundColor: Colors.white,
-      backgroundColor: Colors.orange,
-    ),
-  ),
-  inputDecorationTheme: InputDecorationTheme(
-    floatingLabelStyle: const TextStyle(
-      color: Colors.orange,
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(
-        color: Colors.grey,
-        width: 2,
-      ),
-    ),
-    focusColor: Colors.orange,
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(
-        color: Colors.orange,
-        width: 2,
-      ),
-    ),
-  ),
-);
-
-/// Set of extension methods to easily display a snackbar
+/// Snackbarを楽に表示させるための拡張メソッド
 extension ShowSnackBar on BuildContext {
-  /// Displays a basic snackbar
+  /// 標準的なSnackbarを表示
   void showSnackBar({
     required String message,
     Color backgroundColor = Colors.white,
@@ -76,8 +30,11 @@ extension ShowSnackBar on BuildContext {
     ));
   }
 
-  /// Displays a red snackbar indicating error
+  /// エラーが起きた際のSnackbarを表示
   void showErrorSnackBar({required String message}) {
-    showSnackBar(message: message, backgroundColor: Colors.red);
+    showSnackBar(
+      message: message,
+      backgroundColor: Theme.of(this).colorScheme.error,
+    );
   }
 }

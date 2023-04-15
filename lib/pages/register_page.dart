@@ -5,15 +5,13 @@ import 'package:my_chat_app/utils/constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key, required this.isRegistering}) : super(key: key);
+  const RegisterPage({Key? key}) : super(key: key);
 
   static Route<void> route({bool isRegistering = false}) {
     return MaterialPageRoute(
-      builder: (context) => RegisterPage(isRegistering: isRegistering),
+      builder: (context) => const RegisterPage(),
     );
   }
-
-  final bool isRegistering;
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -39,6 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       await supabase.auth.signUp(
           email: email, password: password, data: {'username': username});
+      // TODO: チャットページ実装後に下記コードを追加
       Navigator.of(context)
           .pushAndRemoveUntil(ChatPage.route(), (route) => false);
     } on AuthException catch (error) {
@@ -52,7 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register'),
+        title: const Text('登録'),
       ),
       body: Form(
         key: _formKey,
@@ -62,11 +61,11 @@ class _RegisterPageState extends State<RegisterPage> {
             TextFormField(
               controller: _emailController,
               decoration: const InputDecoration(
-                label: Text('Email'),
+                label: Text('メールアドレス'),
               ),
               validator: (val) {
                 if (val == null || val.isEmpty) {
-                  return 'Required';
+                  return '必須';
                 }
                 return null;
               },
@@ -77,14 +76,14 @@ class _RegisterPageState extends State<RegisterPage> {
               controller: _passwordController,
               obscureText: true,
               decoration: const InputDecoration(
-                label: Text('Password'),
+                label: Text('パスワード'),
               ),
               validator: (val) {
                 if (val == null || val.isEmpty) {
-                  return 'Required';
+                  return '必須';
                 }
                 if (val.length < 6) {
-                  return '6 characters minimum';
+                  return '6文字以上';
                 }
                 return null;
               },
@@ -93,15 +92,15 @@ class _RegisterPageState extends State<RegisterPage> {
             TextFormField(
               controller: _usernameController,
               decoration: const InputDecoration(
-                label: Text('Username'),
+                label: Text('ユーザー名'),
               ),
               validator: (val) {
                 if (val == null || val.isEmpty) {
-                  return 'Required';
+                  return '必須';
                 }
                 final isValid = RegExp(r'^[A-Za-z0-9_]{3,24}$').hasMatch(val);
                 if (!isValid) {
-                  return '3-24 long with alphanumeric or underscore';
+                  return '3~24文字のアルファベットか文字で入力してください';
                 }
                 return null;
               },
@@ -109,14 +108,14 @@ class _RegisterPageState extends State<RegisterPage> {
             formSpacer,
             ElevatedButton(
               onPressed: _isLoading ? null : _signUp,
-              child: const Text('Register'),
+              child: const Text('登録'),
             ),
             formSpacer,
             TextButton(
               onPressed: () {
                 Navigator.of(context).push(LoginPage.route());
               },
-              child: const Text('I already have an account'),
+              child: const Text('すでにアカウントをお持ちの方はこちら'),
             )
           ],
         ),
